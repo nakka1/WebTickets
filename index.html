@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEI Viagens - Descubra o Mundo</title>
+    <title>Web Passeios</title>
     <link rel="stylesheet" href="./assets/css/style.css">
     <script src="assets/js/main.js" defer></script>
 </head>
@@ -26,7 +26,7 @@
             </ul>
             
             <div class="auth-container">
-                <a href="login.html" id="nav-btn-login" class="btn-outline">Fazer Login</a>
+                <a href="pages/login.html" id="nav-btn-login" class="btn-outline">Fazer Login</a>
 
                 <div id="nav-user-profile" class="user-profile" style="display: none;">
                     <span id="nav-user-email" class="user-email">usuario@email.com</span>
@@ -71,26 +71,67 @@
         </section>
 
         <section id="planos" class="page-section bg-alt">
-            <h2 class="section-title" style="text-align: center;">Nossos Planos</h2>
-            <div class="cards-grid" style="max-width: 800px; margin: 0 auto;">
+            <h2 class="section-title" style="text-align: center;">Planos Eficientes</h2>
+            <div class="cards-grid" style="max-width: 1100px; margin: 0 auto;">
                 
                 <div class="plan-card">
-                    <div class="card-content" style="align-items: center; text-align: center; padding: 40px 20px;">
-                        <h3 style="font-size: 24px; margin-bottom: 10px;">Plano Básico</h3>
-                        <p class="card-desc">Hospedagem e Passagem Aérea</p>
-                        <p class="card-price" style="font-size: 32px; margin: 25px 0;">R$ 999<span style="font-size: 14px; font-weight: normal; color: var(--color-placeholder);">/pessoa</span></p>
-                        <button class="form-btn form-btn--submit" style="width: 100%; margin-top: auto;">Escolher Básico</button>
+                    <div class="card-content" style="padding: 40px 25px;">
+                        <h3 style="font-size: 22px; margin-bottom: 5px; text-align: center;">Plano Essencial</h3>
+                        <p class="card-desc" style="text-align: center; min-height: 40px;">Para quem ama explorar com liberdade</p>
+                        <p class="card-price" style="font-size: 32px; margin: 20px 0; text-align: center;">R$ 999<span style="font-size: 14px; font-weight: normal; color: var(--color-placeholder);">/ano</span></p>
+                        
+                        <ul class="plan-features">
+                            <li>✔️ 1 viagem nacional (até 5 dias)</li>
+                            <li>✔️ Hospedagem turística 3 estrelas</li>
+                            <li>✔️ Roteiro digital otimizado via IA</li>
+                            <li>✔️ Suporte via WhatsApp</li>
+                            <li class="feature-disabled">❌ Passeios guiados inclusos</li>
+                            <li class="feature-disabled">❌ Translado aeroporto-hotel</li>
+                        </ul>
+
+                        <button class="form-btn" style="width: 100%; margin-top: auto; border: 1px solid var(--color-primary); color: var(--color-primary);">Assinar Essencial</button>
                     </div>
                 </div>
 
                 <div class="plan-card plan-card--highlight">
-                    <div class="card-content" style="align-items: center; text-align: center; padding: 40px 20px;">
-                        <div style="background: var(--color-primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase;">Mais Vendido</div>
+                    <div class="card-content" style="padding: 40px 25px;">
+                        <div style="text-align: center;">
+                            <span style="background: var(--color-primary); color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Melhor Custo-Benefício</span>
+                        </div>
                         
-                        <h3 style="font-size: 24px; margin-bottom: 10px;">Plano VIP</h3>
-                        <p class="card-desc">All-Inclusive + Guias + Translado</p>
-                        <p class="card-price" style="font-size: 32px; margin: 25px 0;">R$ 2.499<span style="font-size: 14px; font-weight: normal; color: var(--color-placeholder);">/pessoa</span></p>
-                        <button class="form-btn form-btn--submit" style="width: 100%; margin-top: auto;">Escolher VIP</button>
+                        <h3 style="font-size: 22px; margin-top: 20px; margin-bottom: 5px; text-align: center;">Plano Conforto</h3>
+                        <p class="card-desc" style="text-align: center; min-height: 40px;">O equilíbrio perfeito para suas férias</p>
+                        <p class="card-price" style="font-size: 32px; margin: 20px 0; text-align: center;">R$ 1.599<span style="font-size: 14px; font-weight: normal; color: var(--color-placeholder);">/ano</span></p>
+                        
+                        <ul class="plan-features">
+                            <li>⭐ 1 viagem nacional garantida (até 7 dias)</li>
+                            <li>⭐ Hospedagem superior 4 estrelas</li>
+                            <li>⭐ Roteiro com 1 passeio guiado incluso</li>
+                            <li>⭐ Suporte prioritário 12h/dia</li>
+                            <li>⭐ Translado aeroporto-hotel</li>
+                            <li class="feature-disabled">❌ Concierge 24/7</li>
+                        </ul>
+
+                        <button class="form-btn form-btn--submit" style="width: 100%; margin-top: auto;">Assinar Conforto</button>
+                    </div>
+                </div>
+
+                <div class="plan-card">
+                    <div class="card-content" style="padding: 40px 25px;">
+                        <h3 style="font-size: 22px; margin-bottom: 5px; text-align: center;">Plano VIP Premium</h3>
+                        <p class="card-desc" style="text-align: center; min-height: 40px;">A experiência definitiva sem preocupações</p>
+                        <p class="card-price" style="font-size: 32px; margin: 20px 0; text-align: center;">R$ 2.499<span style="font-size: 14px; font-weight: normal; color: var(--color-placeholder);">/ano</span></p>
+                        
+                        <ul class="plan-features">
+                            <li>💎 2 viagens (1 Nacional, 1 América do Sul)</li>
+                            <li>💎 Hospedagem Premium/Resort 5 estrelas</li>
+                            <li>💎 Roteiro com passeios exclusivos VIP</li>
+                            <li>💎 Concierge 24/7 para emergências</li>
+                            <li>💎 Translado executivo privado</li>
+                            <li>💎 Seguro viagem internacional</li>
+                        </ul>
+
+                        <button class="form-btn" style="width: 100%; margin-top: auto; border: 1px solid var(--color-primary); color: var(--color-primary);">Assinar VIP Premium</button>
                     </div>
                 </div>
 

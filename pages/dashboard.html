@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Agência de Viagens</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/main.js" defer></script>
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <div class="header-brand">
+            <h2>✈️ Web Passeios</h2>
+        </div>
+        <nav class="header-nav">
+            <a href="../index.html" class="form-link">Sair</a>
+        </nav>
+    </header>
+
+    <main class="dashboard-main">
+        
+        <section class="crud-form-section">
+            <div class="form-container dashboard-box">
+                <div class="form-header">
+                    <p>Gerenciamento de Catálogo</p>
+                    <h1>Cadastrar Destino</h1>
+                </div>
+
+                <form class="form-box" id="travel-form">
+                    <div class="input-group">
+                        <input type="text" id="destino" class="input-field" placeholder="" required />
+                        <label for="destino" class="floating-label">Nome do Destino</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="number" id="preco" class="input-field" placeholder="" min="0" step="0.01" required />
+                        <label for="preco" class="floating-label">Preço (R$)</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="url" id="imagem-url" class="input-field" placeholder="" required />
+                        <label for="imagem-url" class="floating-label">URL da Imagem de Capa</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="descricao" class="input-field" placeholder="" required />
+                        <label for="descricao" class="floating-label">Descrição Breve</label>
+                    </div>
+
+                    <button type="submit" class="form-btn form-btn--submit">
+                        Salvar Pacote
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section class="crud-list-section">
+            <h2 class="section-title">Pacotes Ativos</h2>
+            
+            <div class="travel-card admin-card">
+    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500" alt="Praia" class="card-img">
+            <div class="card-content">
+                <h3>Porto Seguro, BA</h3>
+                    <p class="card-price">R$ 1.499,00</p>
+                    
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" style="color: #007bff; border-color: #007bff;">
+                            ✏️ Editar
+                        </button>
+                        <button class="btn-action btn-delete" style="color: #dc3545; border-color: #dc3545;">
+                            🗑️ Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>
