@@ -685,12 +685,13 @@ body.dark-mode .theme-toggle-btn .icon-sun {
   display: block;
 }
 
-/* Evita que o botão de dark mode (fixo) fique embaixo/sobre o hambúrguer no mobile */
+/* Evita que o botão de dark mode (fixo) fique embaixo/sobre o hambúrguer e a logo no mobile */
 @media (max-width: 768px) {
   .theme-toggle-btn {
-    top: 14px;
-    left: 16px;
-    right: auto;
+    top: 78px !important;
+    left: 16px !important;
+    right: auto !important;
+    z-index: 1200 !important;
   }
 }
 
