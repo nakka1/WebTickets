@@ -3,7 +3,7 @@
    ========================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB2sPFZTSoayC_9pr_VUVQ3C3WtU_tQCkc",
@@ -295,7 +295,7 @@ async function carregarPacotesVitrine() {
         querySnapshot.forEach((doc) => {
             const p = doc.data();
             const index = pacotesVitrineData.length;
-            pacotesVitrineData.push(p);
+            pacotesVitrineData.push({ ...p, id: doc.id });
 
             publicGrid.innerHTML += `
                 <div class="travel-card">
