@@ -347,9 +347,9 @@ function garantirModalPacote() {
                 <p id="pacote-modal-desc" style="margin: 0 0 16px; color: var(--color-placeholder, #666); line-height: 1.5;"></p>
                 <p id="pacote-modal-preco" style="font-size: 26px; font-weight: 700; margin: 0 0 20px; color: var(--color-primary);"></p>
 
-                <a href="#planos" id="pacote-modal-btn-planos" class="form-btn form-btn--submit" style="
-                    width: 100%; text-decoration: none; display: flex; justify-content: center; box-sizing: border-box;
-                ">Ver planos e assinar</a>
+                <button id="pacote-modal-btn-contratar" class="form-btn form-btn--submit" style="
+                    width: 100%; box-sizing: border-box;
+                ">Contratar este pacote</button>
             </div>
         </div>
     `;
@@ -365,7 +365,15 @@ function garantirModalPacote() {
         if (e.target === overlay) fecharModal();
     });
     overlay.querySelector("#pacote-modal-close").addEventListener("click", fecharModal);
-    overlay.querySelector("#pacote-modal-btn-planos").addEventListener("click", fecharModal);
+    overlay.querySelector("#pacote-modal-btn-contratar").addEventListener("click", () => {
+        const p = pacotesVitrineData[overlay.dataset.indexAtual];
+        if (!p) return;
+        localStorage.setItem("pacoteSelecionado", JSON.stringify(p));
+
+        // Detecta se estamos na home (raiz) ou em /pages/
+        const estaEmPages = window.location.pathname.includes("/pages/");
+        window.location.href = (estaEmPages ? "checkout.html" : "pages/checkout.html") + "?pacote=1";
+    });
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && overlay.style.display === "flex") fecharModal();
@@ -378,6 +386,9 @@ window.abrirModalPacote = function (index) {
 
     garantirModalPacote();
 
+    const overlay = document.getElementById("pacote-modal-overlay");
+    overlay.dataset.indexAtual = index;
+
     document.getElementById("pacote-modal-img").src = p.imagem || "";
     document.getElementById("pacote-modal-img").alt = p.destino || "";
     document.getElementById("pacote-modal-titulo").textContent = p.destino || "";
@@ -385,7 +396,6 @@ window.abrirModalPacote = function (index) {
     document.getElementById("pacote-modal-preco").textContent =
         "R$ " + parseFloat(p.preco || 0).toFixed(2);
 
-    const overlay = document.getElementById("pacote-modal-overlay");
     overlay.style.display = "flex";
     document.body.style.overflow = "hidden";
 };
@@ -421,14 +431,48 @@ function setupCheckoutPage() {
 
     const params = new URLSearchParams(window.location.search);
     const planoId = params.get("plano");
-    const plano = PLANOS[planoId] || PLANOS.conforto;
+    const ehPacote = params.get("pacote") === "1";
+
+    let item; // objeto genérico { nome, desc, preco, tipo, idOriginal, imagem }
+
+    if (ehPacote) {
+        const dados = JSON.parse(localStorage.getItem("pacoteSelecionado") || "null");
+        if (dados) {
+            item = {
+                nome: dados.destino,
+                desc: dados.descricao,
+                preco: parseFloat(dados.preco) || 0,
+                tipo: "pacote",
+                imagem: dados.imagem || "",
+            };
+        }
+    }
+
+    // Se não veio pacote válido, cai no fluxo padrão de planos (assinatura)
+    if (!item) {
+        const plano = PLANOS[planoId] || PLANOS.conforto;
+        item = {
+            nome: plano.nome,
+            desc: plano.desc,
+            preco: plano.preco,
+            tipo: "plano",
+            planoId: Object.keys(PLANOS).includes(planoId) ? planoId : "conforto",
+        };
+    }
 
     // Preenche o resumo do pedido
-    document.getElementById("summary-nome").textContent = plano.nome;
-    document.getElementById("summary-desc").textContent = plano.desc;
-    document.getElementById("summary-preco").textContent = formatarPreco(plano.preco) + "/ano";
-    document.getElementById("summary-subtotal").textContent = formatarPreco(plano.preco);
-    document.getElementById("summary-total").textContent = formatarPreco(plano.preco);
+    document.getElementById("summary-nome").textContent = item.nome;
+    document.getElementById("summary-desc").textContent = item.desc;
+    document.getElementById("summary-preco").textContent =
+        formatarPreco(item.preco) + (item.tipo === "plano" ? "/ano" : "");
+    document.getElementById("summary-subtotal").textContent = formatarPreco(item.preco);
+    document.getElementById("summary-total").textContent = formatarPreco(item.preco);
+
+    // Ajusta os rótulos da seção "Assinatura anual" quando for compra de pacote avulso
+    const linhaResumo = document.querySelector(".checkout-summary-row span:first-child");
+    if (linhaResumo && item.tipo === "pacote") {
+        linhaResumo.textContent = "Pacote selecionado";
+    }
 
     // Alternância de método de pagamento
     const methodButtons = document.querySelectorAll(".payment-method-option");
@@ -485,26 +529,31 @@ function setupCheckoutPage() {
         const user = auth.currentUser;
 
         try {
-            // Se o usuário estiver logado, registra a viagem contratada no perfil dele
+            // Se o usuário estiver logado, registra a viagem/pacote contratado no perfil dele
             if (user) {
                 await addDoc(collection(db, "viagens"), {
                     userId: user.uid,
                     userEmail: user.email,
-                    planoId: Object.keys(PLANOS).includes(planoId) ? planoId : "conforto",
-                    planoNome: plano.nome,
-                    planoDesc: plano.desc,
-                    preco: plano.preco,
+                    tipo: item.tipo,
+                    planoId: item.tipo === "plano" ? item.planoId : null,
+                    planoNome: item.nome,
+                    planoDesc: item.desc,
+                    preco: item.preco,
                     metodoPagamento: metodoSelecionado,
                     status: "confirmada",
                     criadoEm: serverTimestamp(),
                 });
             }
 
+            if (item.tipo === "pacote") {
+                localStorage.removeItem("pacoteSelecionado");
+            }
+
             document.getElementById("checkout-content").style.display = "none";
             const successBox = document.getElementById("checkout-success");
             const successText = document.getElementById("checkout-success-text");
             if (!user) {
-                successText.textContent = "Assinatura confirmada! Faça login para acompanhar essa viagem na aba “Viagens Contratadas” do seu perfil.";
+                successText.textContent = "Compra confirmada! Faça login para acompanhar na aba “Viagens Contratadas” do seu perfil.";
             }
             successBox.style.display = "block";
             successBox.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -513,7 +562,7 @@ function setupCheckoutPage() {
             submitBtn.textContent = textoOriginal;
             submitBtn.disabled = false;
             feedbackError.querySelector("span:last-child").textContent =
-                "Não foi possível confirmar sua assinatura agora. Tente novamente.";
+                "Não foi possível confirmar sua compra agora. Tente novamente.";
             feedbackError.classList.add("is-visible");
         }
     });
