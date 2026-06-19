@@ -240,13 +240,6 @@ body.dark-mode .bg-alt {
     display: flex;
   }
 
-  /* Evita que o botão de dark mode (fixo) fique embaixo/sobre o hambúrguer */
-  .theme-toggle-btn {
-    top: 14px;
-    left: 16px;
-    right: auto;
-  }
-
   .header-nav {
     gap: 0;
   }
@@ -690,6 +683,15 @@ body.dark-mode .theme-toggle-btn .icon-moon {
 
 body.dark-mode .theme-toggle-btn .icon-sun {
   display: block;
+}
+
+/* Evita que o botão de dark mode (fixo) fique embaixo/sobre o hambúrguer no mobile */
+@media (max-width: 768px) {
+  .theme-toggle-btn {
+    top: 14px;
+    left: 16px;
+    right: auto;
+  }
 }
 
 /* ==========================================================================
