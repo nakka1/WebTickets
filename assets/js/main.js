@@ -281,16 +281,22 @@ window.deletarPacote = async function(id) {
 /* ==========================================================================
    8. VITRINE PÚBLICA: CARREGAR PACOTES NO INDEX.HTML
    ========================================================================== */
+let pacotesVitrineData = [];
+
 async function carregarPacotesVitrine() {
     const publicGrid = document.getElementById("public-grid");
     if (!publicGrid) return;
 
     try {
         const querySnapshot = await getDocs(collection(db, "pacotes"));
-        publicGrid.innerHTML = ''; 
+        publicGrid.innerHTML = '';
+        pacotesVitrineData = [];
 
         querySnapshot.forEach((doc) => {
             const p = doc.data();
+            const index = pacotesVitrineData.length;
+            pacotesVitrineData.push(p);
+
             publicGrid.innerHTML += `
                 <div class="travel-card">
                     <img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.destino)}" class="card-img">
@@ -298,7 +304,7 @@ async function carregarPacotesVitrine() {
                         <h3>${escapeHtml(p.destino)}</h3>
                         <p class="card-desc">${escapeHtml(p.descricao)}</p>
                         <p class="card-price">R$ ${parseFloat(p.preco).toFixed(2)}</p>
-                        <button class="form-btn form-btn--submit" style="margin-top: 10px;">Tenho Interesse</button>
+                        <button class="form-btn form-btn--submit" style="margin-top: 10px;" onclick="abrirModalPacote(${index})">Tenho Interesse</button>
                     </div>
                 </div>
             `;
@@ -307,6 +313,82 @@ async function carregarPacotesVitrine() {
         console.error("Erro ao carregar vitrine:", e);
     }
 }
+
+/* ==========================================================================
+   8.1 MODAL DE INTERESSE NO PACOTE
+   ========================================================================== */
+function garantirModalPacote() {
+    if (document.getElementById("pacote-modal-overlay")) return;
+
+    const overlay = document.createElement("div");
+    overlay.id = "pacote-modal-overlay";
+    overlay.style.cssText = `
+        position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+        display: none; align-items: center; justify-content: center;
+        z-index: 9999; padding: 20px;
+    `;
+
+    overlay.innerHTML = `
+        <div id="pacote-modal-box" style="
+            background: var(--color-bg, #fff); color: var(--color-text, #222);
+            max-width: 420px; width: 100%; border-radius: 14px; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;
+        ">
+            <button id="pacote-modal-close" aria-label="Fechar" style="
+                position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.4);
+                color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%;
+                font-size: 16px; cursor: pointer; line-height: 1; z-index: 1;
+            ">✕</button>
+
+            <img id="pacote-modal-img" src="" alt="" style="width: 100%; height: 220px; object-fit: cover; display: block;">
+
+            <div style="padding: 24px;">
+                <h3 id="pacote-modal-titulo" style="margin: 0 0 10px; font-size: 22px;"></h3>
+                <p id="pacote-modal-desc" style="margin: 0 0 16px; color: var(--color-placeholder, #666); line-height: 1.5;"></p>
+                <p id="pacote-modal-preco" style="font-size: 26px; font-weight: 700; margin: 0 0 20px; color: var(--color-primary);"></p>
+
+                <a href="#planos" id="pacote-modal-btn-planos" class="form-btn form-btn--submit" style="
+                    width: 100%; text-decoration: none; display: flex; justify-content: center; box-sizing: border-box;
+                ">Ver planos e assinar</a>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    function fecharModal() {
+        overlay.style.display = "none";
+        document.body.style.overflow = "";
+    }
+
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) fecharModal();
+    });
+    overlay.querySelector("#pacote-modal-close").addEventListener("click", fecharModal);
+    overlay.querySelector("#pacote-modal-btn-planos").addEventListener("click", fecharModal);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay.style.display === "flex") fecharModal();
+    });
+}
+
+window.abrirModalPacote = function (index) {
+    const p = pacotesVitrineData[index];
+    if (!p) return;
+
+    garantirModalPacote();
+
+    document.getElementById("pacote-modal-img").src = p.imagem || "";
+    document.getElementById("pacote-modal-img").alt = p.destino || "";
+    document.getElementById("pacote-modal-titulo").textContent = p.destino || "";
+    document.getElementById("pacote-modal-desc").textContent = p.descricao || "";
+    document.getElementById("pacote-modal-preco").textContent =
+        "R$ " + parseFloat(p.preco || 0).toFixed(2);
+
+    const overlay = document.getElementById("pacote-modal-overlay");
+    overlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
+};
 
 /* ==========================================================================
    9. CHECKOUT: ASSINATURA DE PLANOS
