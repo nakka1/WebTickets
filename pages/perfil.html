@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Web Passeios</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script type="module" src="../assets/js/main.js"></script>
+</head>
+<body>
+
+    <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+    </button>
+
+    <header class="public-header">
+        <div class="logo">Web Passeios</div>
+
+        <nav class="header-nav">
+            <ul class="nav-links" id="nav-links">
+                <li><a href="../index.html#explorar">Explorar</a></li>
+                <li><a href="../index.html#planos">Planos</a></li>
+                <li><a href="../index.html#sobre">Sobre</a></li>
+                <li><a href="../index.html#contato">Contato</a></li>
+            </ul>
+
+            <div class="auth-container" id="auth-container">
+                <a href="login.html" id="nav-btn-login" class="btn-outline">Fazer Login</a>
+
+                <div id="nav-user-profile" class="user-profile" style="display: none;">
+                    <a href="perfil.html" id="nav-user-email" class="user-email" style="text-decoration: none;">usuario@email.com</a>
+                    <button id="nav-btn-logout" class="btn-logout-text">Sair</button>
+                </div>
+            </div>
+
+            <button id="nav-toggle" class="nav-toggle-btn" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <!-- Visível apenas se o usuário NÃO estiver logado -->
+        <section class="profile-guard" id="profile-guard" style="display:none;">
+            <h1>Você precisa estar logado</h1>
+            <p>Faça login para ver seu perfil e suas viagens contratadas.</p>
+            <a href="login.html" class="form-btn form-btn--submit" style="text-decoration:none; display:inline-flex; padding-inline: 30px;">Fazer Login</a>
+        </section>
+
+        <!-- Visível apenas se o usuário estiver logado -->
+        <section class="profile-section" id="profile-content" style="display:none;">
+
+            <div class="profile-header-card">
+                <div class="profile-avatar" id="profile-avatar">U</div>
+                <div class="profile-header-info">
+                    <h1 id="profile-name">Minha Conta</h1>
+                    <p id="profile-email">usuario@email.com</p>
+                </div>
+            </div>
+
+            <div class="profile-tabs">
+                <button class="profile-tab-btn is-active" data-tab="viagens">Viagens Contratadas</button>
+                <button class="profile-tab-btn" data-tab="dados">Meus Dados</button>
+            </div>
+
+            <div class="profile-tab-panel is-active" id="tab-viagens">
+                <div id="trips-loading" style="color: var(--color-placeholder);">Carregando suas viagens...</div>
+
+                <div id="trips-empty" class="profile-empty-state" style="display:none;">
+                    <div class="empty-icon">🧳</div>
+                    <p>Você ainda não contratou nenhuma viagem.</p>
+                    <a href="../index.html#planos">Ver planos disponíveis →</a>
+                </div>
+
+                <div id="trips-list"></div>
+            </div>
+
+            <div class="profile-tab-panel" id="tab-dados">
+                <div class="checkout-card" style="max-width: 500px;">
+                    <h2 style="margin-bottom: 20px;">Informações da conta</h2>
+                    <div class="checkout-summary-row">
+                        <span>Nome</span>
+                        <span id="dados-nome">—</span>
+                    </div>
+                    <div class="checkout-summary-row">
+                        <span>Email</span>
+                        <span id="dados-email">—</span>
+                    </div>
+                    <div class="checkout-summary-row">
+                        <span>Conta criada em</span>
+                        <span id="dados-criado">—</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+</body>
+</html>

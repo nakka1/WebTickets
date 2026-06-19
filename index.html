@@ -18,23 +18,31 @@
         <div class="logo">Web Passeios</div>
         
         <nav class="header-nav">
-            <ul class="nav-links">
+            <ul class="nav-links" id="nav-links">
                 <li><a href="#explorar">Explorar</a></li>
                 <li><a href="#planos">Planos</a></li>
                 <li><a href="#sobre">Sobre</a></li>
                 <li><a href="#contato">Contato</a></li>
             </ul>
             
-            <div class="auth-container">
+            <div class="auth-container" id="auth-container">
                 <a href="pages/login.html" id="nav-btn-login" class="btn-outline">Fazer Login</a>
 
                 <div id="nav-user-profile" class="user-profile" style="display: none;">
-                    <span id="nav-user-email" class="user-email">usuario@email.com</span>
+                    <a href="pages/perfil.html" id="nav-user-email" class="user-email" style="text-decoration: none;">usuario@email.com</a>
                     <button id="nav-btn-logout" class="btn-logout-text">Sair</button>
                 </div>
             </div>
+
+            <button id="nav-toggle" class="nav-toggle-btn" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </nav>
     </header>
+
+    <div class="nav-overlay" id="nav-overlay"></div>
 
     <main>
         <section class="hero-section">
@@ -80,7 +88,7 @@
                             <li class="feature-disabled">❌ Translado aeroporto-hotel</li>
                         </ul>
 
-                        <button class="form-btn" style="width: 100%; margin-top: auto; border: 1px solid var(--color-primary); color: var(--color-primary);">Assinar Essencial</button>
+                        <a href="pages/checkout.html?plano=essencial" class="form-btn" style="width: 100%; margin-top: auto; border: 1px solid var(--color-primary); color: var(--color-primary); text-decoration: none;">Assinar Essencial</a>
                     </div>
                 </div>
 
@@ -103,7 +111,7 @@
                             <li class="feature-disabled">❌ Concierge 24/7</li>
                         </ul>
 
-                        <button class="form-btn form-btn--submit" style="width: 100%; margin-top: auto;">Assinar Conforto</button>
+                        <a href="pages/checkout.html?plano=conforto" class="form-btn form-btn--submit" style="width: 100%; margin-top: auto; text-decoration: none;">Assinar Conforto</a>
                     </div>
                 </div>
 
@@ -122,7 +130,7 @@
                             <li>💎 Seguro viagem internacional</li>
                         </ul>
 
-                        <button class="form-btn" style="width: 100%; margin-top: auto; border: 1px solid var(--color-primary); color: var(--color-primary);">Assinar VIP Premium</button>
+                        <a href="pages/checkout.html?plano=vip" class="form-btn" style="width: 100%; margin-top: auto; border: 1px solid var(--color-primary); color: var(--color-primary); text-decoration: none;">Assinar VIP Premium</a>
                     </div>
                 </div>
 
@@ -156,9 +164,18 @@
         <section id="contato" class="page-section bg-alt">
             <h2 class="section-title" style="text-align: center;">Fale Conosco</h2>
             
-            <form class="form-box contact-form">
+            <form class="form-box contact-form" id="form-contato" novalidate>
+                <div class="form-feedback form-feedback--success" id="contato-feedback-success">
+                    <span>✅</span>
+                    <span>Mensagem enviada! Em breve entraremos em contato.</span>
+                </div>
+                <div class="form-feedback form-feedback--error" id="contato-feedback-error">
+                    <span>⚠️</span>
+                    <span>Preencha todos os campos corretamente antes de enviar.</span>
+                </div>
+
                 <div class="input-group">
-                    <input type="text" id="nome-contato" class="input-field" placeholder="" required>
+                    <input type="text" id="nome-contato" class="input-field" placeholder="" required minlength="2">
                     <label for="nome-contato" class="floating-label">Seu Nome</label>
                 </div>
                 
@@ -168,7 +185,7 @@
                 </div>
 
                 <div class="input-group" style="margin-top: 20px;">
-                    <input type="tel" id="telefone-contato" class="input-field" placeholder="" required>
+                    <input type="tel" id="telefone-contato" class="input-field" placeholder="" required minlength="8">
                     <label for="telefone-contato" class="floating-label">Seu Telefone / WhatsApp</label>
                 </div>
 

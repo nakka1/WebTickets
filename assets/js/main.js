@@ -3,7 +3,7 @@
    ========================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB2sPFZTSoayC_9pr_VUVQ3C3WtU_tQCkc",
@@ -19,6 +19,19 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* ==========================================================================
+   0.1 UTILITÁRIO: ESCAPE DE HTML (evita XSS em conteúdo vindo do Firestore)
+   ========================================================================== */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* ==========================================================================
    1. GERENCIAMENTO DE TEMA (DARK / LIGHT MODE)
    ========================================================================== */
 const savedTheme = localStorage.getItem('theme');
@@ -31,6 +44,53 @@ function toggleTheme() {
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 }
 window.toggleTheme = toggleTheme; 
+
+/* ==========================================================================
+   1.1 MENU HAMBÚRGUER (MOBILE)
+   ========================================================================== */
+function setupNavToggle() {
+    const toggleBtn = document.getElementById("nav-toggle");
+    const navLinks = document.getElementById("nav-links");
+    const authContainer = document.getElementById("auth-container");
+    const overlay = document.getElementById("nav-overlay");
+
+    if (!toggleBtn || !navLinks || !overlay) return;
+
+    function openMenu() {
+        toggleBtn.classList.add("is-active");
+        navLinks.classList.add("is-active");
+        if (authContainer) authContainer.classList.add("is-active");
+        overlay.classList.add("is-active");
+        toggleBtn.setAttribute("aria-expanded", "true");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeMenu() {
+        toggleBtn.classList.remove("is-active");
+        navLinks.classList.remove("is-active");
+        if (authContainer) authContainer.classList.remove("is-active");
+        overlay.classList.remove("is-active");
+        toggleBtn.setAttribute("aria-expanded", "false");
+        document.body.style.overflow = "";
+    }
+
+    toggleBtn.addEventListener("click", () => {
+        const isOpen = navLinks.classList.contains("is-active");
+        isOpen ? closeMenu() : openMenu();
+    });
+
+    overlay.addEventListener("click", closeMenu);
+
+    // Fecha o menu ao clicar em qualquer link de navegação (âncoras)
+    navLinks.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", closeMenu);
+    });
+
+    // Fecha o menu se a tela for redimensionada para desktop
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) closeMenu();
+    });
+}
 
 /* ==========================================================================
    2. GERENCIAMENTO DE ESTADO DE LOGIN (FIREBASE AUTH)
@@ -66,9 +126,66 @@ function setupAuthListener() {
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
     setupAuthListener();
+    setupNavToggle();
+    setupContactForm();
+    setupCheckoutPage();
+    setupProfilePage();
     carregarPacotesAdmin();    // Para o Dashboard
     carregarPacotesVitrine();  // Para o Index (Pública)
 });
+
+/* ==========================================================================
+   4.1 FORMULÁRIO DE CONTATO (FALE CONOSCO)
+   ========================================================================== */
+function setupContactForm() {
+    const form = document.getElementById("form-contato");
+    if (!form) return;
+
+    const feedbackSuccess = document.getElementById("contato-feedback-success");
+    const feedbackError = document.getElementById("contato-feedback-error");
+    const nomeInput = document.getElementById("nome-contato");
+    const emailInput = document.getElementById("email-contato");
+    const telefoneInput = document.getElementById("telefone-contato");
+
+    function hideFeedback() {
+        feedbackSuccess.classList.remove("is-visible");
+        feedbackError.classList.remove("is-visible");
+    }
+
+    function markInvalid(input, invalid) {
+        input.classList.toggle("is-invalid", invalid);
+    }
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        hideFeedback();
+
+        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+        const telefoneValido = telefoneInput.value.trim().replace(/\D/g, "").length >= 8;
+        const nomeValido = nomeInput.value.trim().length >= 2;
+
+        markInvalid(nomeInput, !nomeValido);
+        markInvalid(emailInput, !emailValido);
+        markInvalid(telefoneInput, !telefoneValido);
+
+        if (!nomeValido || !emailValido || !telefoneValido) {
+            feedbackError.classList.add("is-visible");
+            feedbackError.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        // Sem backend: apenas confirma visualmente o envio para o usuário.
+        feedbackSuccess.classList.add("is-visible");
+        form.reset();
+        [nomeInput, emailInput, telefoneInput].forEach((input) => markInvalid(input, false));
+        feedbackSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    // Remove o destaque de erro assim que o usuário corrige o campo
+    [nomeInput, emailInput, telefoneInput].forEach((input) => {
+        input.addEventListener("input", () => markInvalid(input, false));
+    });
+}
 
 /* ==========================================================================
    4. AUTENTICAÇÃO: REGISTRO E LOGIN
@@ -130,10 +247,10 @@ async function carregarPacotesAdmin() {
         const pacote = doc.data();
         adminGrid.innerHTML += `
             <div class="travel-card admin-card">
-                <img src="${pacote.imagem}" alt="${pacote.destino}" class="card-img">
+                <img src="${escapeHtml(pacote.imagem)}" alt="${escapeHtml(pacote.destino)}" class="card-img">
                 <div class="card-content">
-                    <h3>${pacote.destino}</h3>
-                    <p>${pacote.descricao}</p>
+                    <h3>${escapeHtml(pacote.destino)}</h3>
+                    <p>${escapeHtml(pacote.descricao)}</p>
                     <p>R$ ${parseFloat(pacote.preco).toFixed(2)}</p>
                     <button class="btn-action" onclick="deletarPacote('${doc.id}')">🗑️ Excluir</button>
                 </div>
@@ -176,10 +293,10 @@ async function carregarPacotesVitrine() {
             const p = doc.data();
             publicGrid.innerHTML += `
                 <div class="travel-card">
-                    <img src="${p.imagem}" alt="${p.destino}" class="card-img">
+                    <img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.destino)}" class="card-img">
                     <div class="card-content">
-                        <h3>${p.destino}</h3>
-                        <p class="card-desc">${p.descricao}</p>
+                        <h3>${escapeHtml(p.destino)}</h3>
+                        <p class="card-desc">${escapeHtml(p.descricao)}</p>
                         <p class="card-price">R$ ${parseFloat(p.preco).toFixed(2)}</p>
                         <button class="form-btn form-btn--submit" style="margin-top: 10px;">Tenho Interesse</button>
                     </div>
@@ -189,4 +306,235 @@ async function carregarPacotesVitrine() {
     } catch (e) {
         console.error("Erro ao carregar vitrine:", e);
     }
+}
+
+/* ==========================================================================
+   9. CHECKOUT: ASSINATURA DE PLANOS
+   ========================================================================== */
+const PLANOS = {
+    essencial: {
+        nome: "Plano Essencial",
+        desc: "Para quem ama explorar com liberdade",
+        preco: 999,
+    },
+    conforto: {
+        nome: "Plano Conforto",
+        desc: "O equilíbrio perfeito para suas férias",
+        preco: 1599,
+    },
+    vip: {
+        nome: "Plano VIP Premium",
+        desc: "A experiência definitiva sem preocupações",
+        preco: 2499,
+    },
+};
+
+function formatarPreco(valor) {
+    return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function setupCheckoutPage() {
+    const checkoutForm = document.getElementById("checkout-form");
+    if (!checkoutForm) return; // Não estamos na página de checkout
+
+    const params = new URLSearchParams(window.location.search);
+    const planoId = params.get("plano");
+    const plano = PLANOS[planoId] || PLANOS.conforto;
+
+    // Preenche o resumo do pedido
+    document.getElementById("summary-nome").textContent = plano.nome;
+    document.getElementById("summary-desc").textContent = plano.desc;
+    document.getElementById("summary-preco").textContent = formatarPreco(plano.preco) + "/ano";
+    document.getElementById("summary-subtotal").textContent = formatarPreco(plano.preco);
+    document.getElementById("summary-total").textContent = formatarPreco(plano.preco);
+
+    // Alternância de método de pagamento
+    const methodButtons = document.querySelectorAll(".payment-method-option");
+    const cardFields = document.getElementById("card-fields");
+    const pixInfo = document.getElementById("pix-info");
+    const boletoInfo = document.getElementById("boleto-info");
+    let metodoSelecionado = "cartao";
+
+    methodButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            methodButtons.forEach((b) => b.classList.remove("is-selected"));
+            btn.classList.add("is-selected");
+            metodoSelecionado = btn.dataset.method;
+
+            cardFields.style.display = metodoSelecionado === "cartao" ? "block" : "none";
+            pixInfo.style.display = metodoSelecionado === "pix" ? "block" : "none";
+            boletoInfo.style.display = metodoSelecionado === "boleto" ? "block" : "none";
+
+            // Campos do cartão só são obrigatórios quando o método é cartão
+            const cardInputs = cardFields.querySelectorAll(".input-field");
+            cardInputs.forEach((input) => {
+                input.required = metodoSelecionado === "cartao";
+            });
+        });
+    });
+
+    // Máscara simples de validade MM/AA
+    const validadeInput = document.getElementById("card-validade");
+    if (validadeInput) {
+        validadeInput.addEventListener("input", () => {
+            let v = validadeInput.value.replace(/\D/g, "").slice(0, 4);
+            if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2);
+            validadeInput.value = v;
+        });
+    }
+
+    const feedbackError = document.getElementById("checkout-feedback-error");
+
+    checkoutForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        feedbackError.classList.remove("is-visible");
+
+        if (metodoSelecionado === "cartao" && !checkoutForm.checkValidity()) {
+            feedbackError.classList.add("is-visible");
+            feedbackError.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        const submitBtn = checkoutForm.querySelector("button[type=submit]");
+        const textoOriginal = submitBtn.textContent;
+        submitBtn.textContent = "Processando...";
+        submitBtn.disabled = true;
+
+        const user = auth.currentUser;
+
+        try {
+            // Se o usuário estiver logado, registra a viagem contratada no perfil dele
+            if (user) {
+                await addDoc(collection(db, "viagens"), {
+                    userId: user.uid,
+                    userEmail: user.email,
+                    planoId: Object.keys(PLANOS).includes(planoId) ? planoId : "conforto",
+                    planoNome: plano.nome,
+                    planoDesc: plano.desc,
+                    preco: plano.preco,
+                    metodoPagamento: metodoSelecionado,
+                    status: "confirmada",
+                    criadoEm: serverTimestamp(),
+                });
+            }
+
+            document.getElementById("checkout-content").style.display = "none";
+            const successBox = document.getElementById("checkout-success");
+            const successText = document.getElementById("checkout-success-text");
+            if (!user) {
+                successText.textContent = "Assinatura confirmada! Faça login para acompanhar essa viagem na aba “Viagens Contratadas” do seu perfil.";
+            }
+            successBox.style.display = "block";
+            successBox.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (err) {
+            console.error("Erro ao confirmar assinatura:", err);
+            submitBtn.textContent = textoOriginal;
+            submitBtn.disabled = false;
+            feedbackError.querySelector("span:last-child").textContent =
+                "Não foi possível confirmar sua assinatura agora. Tente novamente.";
+            feedbackError.classList.add("is-visible");
+        }
+    });
+}
+
+/* ==========================================================================
+   10. PERFIL DO USUÁRIO: VIAGENS CONTRATADAS
+   ========================================================================== */
+function setupProfilePage() {
+    const profileContent = document.getElementById("profile-content");
+    const profileGuard = document.getElementById("profile-guard");
+    if (!profileContent || !profileGuard) return; // Não estamos na página de perfil
+
+    // Abas (Viagens Contratadas / Meus Dados)
+    const tabButtons = document.querySelectorAll(".profile-tab-btn");
+    tabButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            tabButtons.forEach((b) => b.classList.remove("is-active"));
+            document.querySelectorAll(".profile-tab-panel").forEach((p) => p.classList.remove("is-active"));
+            btn.classList.add("is-active");
+            document.getElementById("tab-" + btn.dataset.tab).classList.add("is-active");
+        });
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            profileGuard.style.display = "block";
+            profileContent.style.display = "none";
+            return;
+        }
+
+        profileGuard.style.display = "none";
+        profileContent.style.display = "block";
+
+        // Cabeçalho do perfil
+        const inicial = user.email ? user.email.charAt(0).toUpperCase() : "U";
+        document.getElementById("profile-avatar").textContent = inicial;
+        document.getElementById("profile-name").textContent = user.email;
+        document.getElementById("profile-email").textContent = user.email;
+
+        // Aba "Meus Dados"
+        document.getElementById("dados-nome").textContent = user.displayName || user.email.split("@")[0];
+        document.getElementById("dados-email").textContent = user.email;
+        document.getElementById("dados-criado").textContent = user.metadata?.creationTime
+            ? new Date(user.metadata.creationTime).toLocaleDateString("pt-BR")
+            : "—";
+
+        await carregarViagensContratadas(user.uid);
+    });
+}
+
+async function carregarViagensContratadas(uid) {
+    const loading = document.getElementById("trips-loading");
+    const empty = document.getElementById("trips-empty");
+    const list = document.getElementById("trips-list");
+
+    try {
+        const q = query(collection(db, "viagens"), where("userId", "==", uid));
+        const snapshot = await getDocs(q);
+
+        loading.style.display = "none";
+
+        if (snapshot.empty) {
+            empty.style.display = "block";
+            list.innerHTML = "";
+            return;
+        }
+
+        empty.style.display = "none";
+
+        // Ordena no client (evita exigir índice composto no Firestore)
+        const viagens = snapshot.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => (b.criadoEm?.seconds || 0) - (a.criadoEm?.seconds || 0));
+
+        list.innerHTML = viagens
+            .map((v) => {
+                const data = v.criadoEm?.seconds
+                    ? new Date(v.criadoEm.seconds * 1000).toLocaleDateString("pt-BR")
+                    : "Data indisponível";
+                return `
+                    <div class="trip-card">
+                        <div class="trip-card-body">
+                            <span class="trip-status">${escapeHtml(v.status || "confirmada")}</span>
+                            <h3>${escapeHtml(v.planoNome)}</h3>
+                            <p class="card-desc">${escapeHtml(v.planoDesc || "")}</p>
+                            <div class="trip-card-meta">
+                                <span>📅 Contratado em ${data}</span>
+                                <span>💳 ${escapeHtml(formatarMetodoPagamento(v.metodoPagamento))}</span>
+                                <span>💰 ${formatarPreco(v.preco || 0)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            })
+            .join("");
+    } catch (e) {
+        console.error("Erro ao carregar viagens contratadas:", e);
+        loading.textContent = "Não foi possível carregar suas viagens agora. Tente recarregar a página.";
+    }
+}
+
+function formatarMetodoPagamento(metodo) {
+    const nomes = { cartao: "Cartão de crédito", pix: "Pix", boleto: "Boleto" };
+    return nomes[metodo] || "Não informado";
 }

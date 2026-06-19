@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Assinatura - Web Passeios</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script type="module" src="../assets/js/main.js"></script>
+</head>
+<body>
+
+    <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+    </button>
+
+    <header class="public-header">
+        <div class="logo">Web Passeios</div>
+
+        <nav class="header-nav">
+            <ul class="nav-links" id="nav-links">
+                <li><a href="../index.html#explorar">Explorar</a></li>
+                <li><a href="../index.html#planos">Planos</a></li>
+                <li><a href="../index.html#sobre">Sobre</a></li>
+                <li><a href="../index.html#contato">Contato</a></li>
+            </ul>
+
+            <div class="auth-container" id="auth-container">
+                <a href="login.html" id="nav-btn-login" class="btn-outline">Fazer Login</a>
+
+                <div id="nav-user-profile" class="user-profile" style="display: none;">
+                    <a href="perfil.html" id="nav-user-email" class="user-email" style="text-decoration: none;">usuario@email.com</a>
+                    <button id="nav-btn-logout" class="btn-logout-text">Sair</button>
+                </div>
+            </div>
+
+            <button id="nav-toggle" class="nav-toggle-btn" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <section class="checkout-section">
+            <a href="../index.html#planos" class="checkout-back">← Voltar para os planos</a>
+
+            <div id="checkout-content">
+                <div class="checkout-grid">
+
+                    <div class="checkout-card">
+                        <h2>Dados de pagamento</h2>
+
+                        <div class="form-feedback form-feedback--error" id="checkout-feedback-error">
+                            <span>⚠️</span>
+                            <span>Preencha todos os campos corretamente para continuar.</span>
+                        </div>
+
+                        <div class="payment-methods">
+                            <button type="button" class="payment-method-option is-selected" data-method="cartao">
+                                <span class="pm-icon">💳</span>
+                                Cartão
+                            </button>
+                            <button type="button" class="payment-method-option" data-method="pix">
+                                <span class="pm-icon">⚡</span>
+                                Pix
+                            </button>
+                            <button type="button" class="payment-method-option" data-method="boleto">
+                                <span class="pm-icon">🧾</span>
+                                Boleto
+                            </button>
+                        </div>
+
+                        <form class="form-box" id="checkout-form" novalidate>
+
+                            <div id="card-fields">
+                                <div class="input-group">
+                                    <input type="text" id="card-nome" class="input-field" placeholder="" required minlength="3" autocomplete="cc-name">
+                                    <label for="card-nome" class="floating-label">Nome impresso no cartão</label>
+                                </div>
+
+                                <div class="input-group" style="margin-top: 20px;">
+                                    <input type="text" id="card-numero" class="input-field" placeholder="" required minlength="13" maxlength="19" inputmode="numeric" autocomplete="cc-number">
+                                    <label for="card-numero" class="floating-label">Número do cartão</label>
+                                </div>
+
+                                <div class="checkout-row" style="margin-top: 20px;">
+                                    <div class="input-group">
+                                        <input type="text" id="card-validade" class="input-field" placeholder="" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}" maxlength="5" autocomplete="cc-exp">
+                                        <label for="card-validade" class="floating-label">Validade (MM/AA)</label>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="text" id="card-cvv" class="input-field" placeholder="" required minlength="3" maxlength="4" inputmode="numeric" autocomplete="cc-csc">
+                                        <label for="card-cvv" class="floating-label">CVV</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p id="pix-info" style="display:none; color: var(--color-placeholder); font-size: 14px; line-height: 1.6; margin-top: 10px;">
+                                O código Pix Copia e Cola será gerado após a confirmação. O pagamento é processado em poucos minutos e sua assinatura é ativada automaticamente.
+                            </p>
+
+                            <p id="boleto-info" style="display:none; color: var(--color-placeholder); font-size: 14px; line-height: 1.6; margin-top: 10px;">
+                                O boleto vence em 3 dias úteis. Sua assinatura é ativada assim que o pagamento for compensado.
+                            </p>
+
+                            <button type="submit" class="form-btn form-btn--submit" style="width: 100%; margin-top: 30px;">
+                                Confirmar Assinatura
+                            </button>
+
+                            <p class="checkout-secure-note">🔒 Ambiente seguro · seus dados não são compartilhados</p>
+                        </form>
+                    </div>
+
+                    <div class="checkout-card">
+                        <h2>Resumo do pedido</h2>
+
+                        <div class="checkout-summary-plan">
+                            <div>
+                                <div class="plan-name" id="summary-nome">Plano</div>
+                                <div class="plan-desc" id="summary-desc">Descrição</div>
+                            </div>
+                            <div class="plan-price" id="summary-preco">R$ 0</div>
+                        </div>
+
+                        <div class="checkout-summary-row">
+                            <span>Assinatura anual</span>
+                            <span id="summary-subtotal">R$ 0</span>
+                        </div>
+                        <div class="checkout-summary-row">
+                            <span>Taxa de serviço</span>
+                            <span>R$ 0,00</span>
+                        </div>
+
+                        <div class="checkout-summary-total">
+                            <span>Total</span>
+                            <span id="summary-total">R$ 0</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="checkout-success" class="checkout-card checkout-success" style="display:none; max-width: 500px; margin: 0 auto;">
+                <div class="success-icon">🎉</div>
+                <h2>Assinatura confirmada!</h2>
+                <p id="checkout-success-text">Seu plano foi ativado com sucesso. Em breve você receberá um e-mail com todos os detalhes.</p>
+                <a href="../index.html" class="form-btn form-btn--submit" style="text-decoration:none; display:inline-flex; padding-inline: 30px;">Voltar para a Home</a>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
